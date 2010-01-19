@@ -1,6 +1,3 @@
-#ifndef __SUFFIX_H
-#define __SUFFIX_H
-
 #include "Suffix.h"
 
 Suffix::Suffix(int node, int start, int stop)
@@ -20,9 +17,7 @@ int Suffix::Implicit()
 	return lastCharIndex >= firstCharIndex;
 }
 
-void Canonize()
+void Suffix::Canonize()
 {
 }
-
-#endif
 
