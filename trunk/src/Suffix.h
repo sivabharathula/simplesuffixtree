@@ -1,3 +1,5 @@
+#ifndef __SUFFIX_H
+#define __SUFFIX_H
 
 class Suffix
 {
@@ -12,4 +14,6 @@ class Suffix
 		int firstCharIndex;
 		int lastCharIndex;
 };
+
+#endif
 
