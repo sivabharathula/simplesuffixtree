@@ -16,3 +16,7 @@ Edge::Edge(int initialFirstCharIndex,
 	endNode = Node::Count++;
 }
 
+int Edge::Hash(int node, int c)
+{
+	return ((node << 8) + c) % 2179;
+}

@@ -9,6 +9,8 @@ class Edge
 				int initialLastCharIndex,
 				int parentNode);
 
+		static int Hash(int node, int c);
+
 		int firstCharIndex;
 		int lastCharIndex;
 		int startNode;
