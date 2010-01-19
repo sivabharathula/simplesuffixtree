@@ -1,3 +1,6 @@
+#ifndef __SUFFIX_H
+#define __SUFFIX_H
+
 #include "Suffix.h"
 
 Suffix::Suffix(int node, int start, int stop)
@@ -20,4 +23,6 @@ int Suffix::Implicit()
 void Canonize()
 {
 }
+
+#endif
 
