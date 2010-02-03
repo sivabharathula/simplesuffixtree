@@ -1,17 +1,19 @@
 CC=g++
 CFLAGS=-Wall
-OBJECTS=Node.o Edge.o Suffix.o SuffixTree.o Example.o
+OBJECTS=src/Node.o src/Edge.o src/Suffix.o src/SuffixTree.o src/Example.o
 
 default: all
 
 all: suffixtree
 
-.cpp.o:
-	$(CC) $(CFLAGS) -c $<
+LIBS = 
 
-suffixtree: $(OBJECTS)
-	$(CC) $(OBJECTS) -o example
+TARGET =	example
+
+suffixtree:	$(OBJECTS)
+	$(CC) -o $(TARGET) $(OBJECTS) $(LIBS)
+ 
 
 clean:
-	rm -f Node.o Edge.o Suffix.o SuffixTree.o Example.o example
+	rm -f $(OBJECTS) example
 
