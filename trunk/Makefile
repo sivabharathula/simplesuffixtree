@@ -1,6 +1,7 @@
 CC=g++
-CFLAGS=-Wall
-OBJECTS=src/Node.o src/Edge.o src/Suffix.o src/SuffixTree.o src/Example.o
+CFLAGS=-Wall -g
+CXXFLAGS=-Wall -g --pedantic
+OBJECTS=src/Node.o src/Edge.o src/NullEdge.o src/Suffix.o src/SuffixTree.o src/Example.o
 
 default: all
 
@@ -11,7 +12,7 @@ LIBS =
 TARGET =	example
 
 suffixtree:	$(OBJECTS)
-	$(CC) -o $(TARGET) $(OBJECTS) $(LIBS)
+	$(CC) $(CFLAGS) -o $(TARGET) $(OBJECTS) $(LIBS)
  
 
 clean:
