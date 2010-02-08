@@ -1,6 +1,8 @@
 #ifndef __SUFFIX_H
 #define __SUFFIX_H
 
+
+class SuffixTree;
 class Suffix
 {
 	public:
@@ -13,6 +15,7 @@ class Suffix
 		int originNode;
 		int firstCharIndex;
 		int lastCharIndex;
+		SuffixTree* tree;
 };
 
 #endif
