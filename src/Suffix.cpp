@@ -2,37 +2,48 @@
 #include "Edge.h"
 #include "SuffixTree.h"
 
-Suffix::Suffix(int node, int start, int stop)
+Suffix::Suffix(int node, int start, int stop) :
+	d_originNode(node), d_firstCharIndex(start), d_lastCharIndex(stop)
 {
-	originNode = node;
-	firstCharIndex = start;
-	lastCharIndex = stop;
 }
 
-int Suffix::Explicit()
+bool Suffix::isExplicit()
 {
-	return firstCharIndex > lastCharIndex;
+	return d_firstCharIndex > d_lastCharIndex;
 }
 
-int Suffix::Implicit()
+bool Suffix::isImplicit()
 {
-	return lastCharIndex >= firstCharIndex;
+	return d_lastCharIndex >= d_firstCharIndex;
 }
 
-void Suffix::Canonize()
+int Suffix::getFirstCharIndex() const
 {
-    if ( !Explicit() ) {
+	return d_firstCharIndex;
+}
 
-        Edge* edge = &(tree->Find( originNode, tree->Text[ firstCharIndex ] ));
-        int edge_span = edge->lastCharIndex - edge->getFirstCharIndex();
-        while ( edge_span <= ( lastCharIndex - firstCharIndex) ) {
-            firstCharIndex = firstCharIndex + edge_span + 1;
-            originNode = edge->endNode;
-            if ( firstCharIndex <= lastCharIndex ) {
-                edge = &(tree->Find( edge->endNode, tree->Text[ firstCharIndex ] ));
-                edge_span = edge->lastCharIndex- edge->getFirstCharIndex();
-            };
-        }
-    }
+void Suffix::setFirstCharIndex(int index)
+{
+	d_firstCharIndex = index;
+}
+
+int Suffix::getLastCharIndex() const
+{
+	return d_lastCharIndex;
+}
+
+void Suffix::setLastCharIndex(int index)
+{
+	d_lastCharIndex = index;
+}
+
+int Suffix::getOriginNode() const
+{
+	return d_originNode;
+}
+
+void Suffix::setOriginNode(int node)
+{
+	d_originNode = node;
 }
 

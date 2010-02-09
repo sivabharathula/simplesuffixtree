@@ -8,33 +8,34 @@
 #include <boost/unordered_set.hpp>
 #include <map>
 
-using namespace std;
-
 class SuffixTree
 {
-	public:
-	string Text;
-	private:
-		typedef boost::unordered_set<Edge, EdgeHash, EdgeEqualTo> EdgeHashSet;
-		typedef std::map<int, Node> NodeMap;
-		void AddPrefix(Suffix &active, int lastCharIndex);
-		void Insert(Edge &edge);
-		void Remove(Edge &edge);
+public:
 
+	SuffixTree(const std::string& inputText);
+	~SuffixTree();
 
-		unsigned int Length;
-		Suffix Active;
-		Edge Edges[2179];
-		Node Nodes[2000];
+	bool isSuffix(std::string::const_iterator begin,
+			std::string::const_iterator end, int node = 0);
+	bool isSuffix(const std::string& text);
 
-		EdgeHashSet d_edges;
-		NodeMap d_nodes;
-	public:
-		void dump_edges( int current_n );
-		SuffixTree(string inputText);
-		~SuffixTree();
-		Edge& Find(int node, int c);
-		int SplitEdge(Suffix &suffix, Edge &edge);
+	void dumpEdges(int current_n);
+
+private:
+	typedef boost::unordered_set<Edge, EdgeHash, EdgeEqualTo> EdgeHashSet;
+	typedef std::map<int, Node> NodeMap;
+	void addPrefix(Suffix &active, int lastCharIndex);
+	void insert(Edge &edge);
+	void remove(Edge &edge);
+	Edge& find(int nodeParent, char firstCharOnEdge);
+	int splitEdge(Suffix &suffix, Edge edge);
+	void canonize(Suffix& suffix);
+
+	const std::string& d_text;
+	Suffix d_active;
+	EdgeHashSet d_edges;
+	NodeMap d_nodes;
+
 };
 
 #endif
