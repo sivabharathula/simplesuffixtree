@@ -3,13 +3,18 @@
 
 class Node
 {
-	public:
-		Node();
+public:
+	Node();
+	Node(int suffixNode);
 
-		int suffixNode;
-
-		static int Count;
+	int getSuffixNode() const;
+	void setSuffixNode(int suffixNode);
+	const static int EMPTY;
+private:
+	int d_suffixNode;
 };
+
+
 
 #endif
 

@@ -6,22 +6,20 @@
 #include "Suffix.h"
 #include "Edge.h"
 #include "NullEdge.h"
+#include <cassert>
 #include <boost/unordered_map.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/range.hpp>
 
-int Node::Count = 1;
-
-SuffixTree::SuffixTree(string inputText) :
-	Text(inputText),
-	Length(inputText.length()),
-	Active(0, 0, -1)
+SuffixTree::SuffixTree(const std::string& inputText) :
+	d_text(inputText), d_active(0, 0, -1)
 {
-	Active.tree = this;
-	Node zero_Node;
-	zero_Node.suffixNode = 0;
+	Node zero_Node(0);
 	d_nodes[0] = zero_Node;
-	for (unsigned int i = 0; i <= Length; ++i)
+
+	for (unsigned int i = 0; i <= d_text.length(); ++i)
 	{
-		AddPrefix(Active, i);
+		addPrefix(d_active, i);
 	}
 }
 
@@ -29,212 +27,217 @@ SuffixTree::~SuffixTree()
 {
 }
 
-void SuffixTree::AddPrefix(Suffix &active, int lastCharIndex)
+void SuffixTree::addPrefix(Suffix &active, int lastCharIndex)
 {
 	int parentNode;
-	int lastParentNode = -1;
+	int lastParentNode = Node::EMPTY;
 
-
-	for (; ;)
+	for (;;)
 	{
-		parentNode = active.originNode;
+		parentNode = active.getOriginNode();
 
-		if (active.Explicit())
+		if (active.isExplicit())
 		{
-			Edge& tmpEdge = Find(Active.originNode, Text[lastCharIndex]);
-			if (tmpEdge.startNode != -1)
+			Edge& tmpEdge = find(d_active.getOriginNode(), d_text[lastCharIndex]);
+			if (!tmpEdge.isNull())
 			{
 				break;
 			}
 		}
 		else
 		{
-			Edge& tmpEdge = Find(Active.originNode, Text[Active.firstCharIndex]);
-			int span = Active.lastCharIndex - Active.firstCharIndex;
+			Edge& tmpEdge =
+					find(d_active.getOriginNode(), d_text[d_active.getFirstCharIndex()]);
+			int span = d_active.getLastCharIndex() - d_active.getFirstCharIndex();
 
-			if (Text[tmpEdge.getFirstCharIndex() + span + 1] == Text[lastCharIndex])
+			if (d_text[tmpEdge.getFirstCharIndex() + span + 1]
+					== d_text[lastCharIndex])
 			{
 				break;
 			}
 
-			parentNode = SplitEdge(Active, tmpEdge);
+			parentNode = splitEdge(d_active, tmpEdge);
 		}
 
-		Edge newEdge(lastCharIndex, Length, parentNode, d_nodes.size(), Text[lastCharIndex]);
+		Edge newEdge(lastCharIndex, d_text.length(), parentNode, d_nodes.size(),
+				d_text[lastCharIndex]);
 		assert(d_nodes.find(d_nodes.size()) == d_nodes.end());
 		d_nodes[d_nodes.size()] = Node();
-		Insert(newEdge);
+		insert(newEdge);
 
 		if (lastParentNode > 0)
 		{
-			d_nodes[lastParentNode].suffixNode = parentNode;
-			//Nodes[lastParentNode].suffixNode = parentNode;
+			d_nodes[lastParentNode].setSuffixNode( parentNode );
 		}
 
 		lastParentNode = parentNode;
 
-		if (Active.originNode == 0)
+		if (d_active.getOriginNode() == 0)
 		{
-			Active.firstCharIndex++;
+			d_active.setFirstCharIndex( d_active.getFirstCharIndex()+1);
 		}
 		else
 		{
-			Active.originNode = d_nodes[Active.originNode].suffixNode;
-			//Active.originNode = Nodes[Active.originNode].suffixNode;
+			d_active.setOriginNode(
+					d_nodes[d_active.getOriginNode()].getSuffixNode() );
 		}
 
-		Active.Canonize();
+		canonize(d_active);
 	}
 
 	if (lastParentNode > 0)
 	{
-		d_nodes[lastParentNode].suffixNode = parentNode;
-		//Nodes[lastParentNode].suffixNode = parentNode;
+		d_nodes[lastParentNode].setSuffixNode( parentNode );
 	}
 
-	Active.lastCharIndex++;
-	Active.Canonize();
+	d_active.setLastCharIndex(d_active.getLastCharIndex() + 1);
+	canonize(d_active);
 }
 
-Edge& SuffixTree::Find(int node, int c)
+void SuffixTree::canonize(Suffix& suffix)
 {
+    if ( !suffix.isExplicit() ) {
 
-	Edge mockEdge(c, c, node, -1, c);
+        Edge* edge = &(find( suffix.getOriginNode(), d_text[ suffix.getFirstCharIndex() ] ));
+        int edge_span = edge->getLastCharIndex() - edge->getFirstCharIndex();
+        while ( edge_span <= ( suffix.getLastCharIndex() - suffix.getFirstCharIndex()) ) {
+
+        	suffix.setFirstCharIndex( suffix.getFirstCharIndex() + edge_span + 1);
+        	suffix.setOriginNode( edge->getEndNode() );
+            if ( suffix.getFirstCharIndex() <= suffix.getLastCharIndex()) {
+                edge = &(find( edge->getEndNode(), d_text[ suffix.getFirstCharIndex() ] ));
+                edge_span = edge->getLastCharIndex()- edge->getFirstCharIndex();
+            };
+        }
+    }
+}
+
+Edge& SuffixTree::find(int nodeParent, char firstCharOnEdge)
+{
+	Edge mockEdge(0, 0, nodeParent, Node::EMPTY, firstCharOnEdge);
 	EdgeHashSet::const_iterator cit = d_edges.find(mockEdge);
 	if (cit == d_edges.end())
 	{
 		return NullEdge::getNull();
 	}
-	return const_cast<Edge&>(*cit);
-
-/*
-	int i = Edge::Hash(node, c);
-	for ( ; ; )
-	{
-		if (Edges[i].startNode == node )
-		{
-			if (c == Text[Edges[i].getFirstCharIndex()])
-			{
-				return Edges[i];
-			}
-		}
-		if (Edges[i].startNode == -1)
-		{
-			return Edges[i];
-		}
-		i++;
-		i	%= 2179;
-	}
-*/
+	return const_cast<Edge&> (*cit);
 }
 
-void SuffixTree::Insert(Edge& edge)
+void SuffixTree::insert(Edge& edge)
 {
 	d_edges.insert(edge);
 	assert(d_edges.find(edge) != d_edges.end());
-
-/*
-	int i = Edge::Hash(edge.startNode, Text[edge.firstCharIndex]);
-	while (Edges[i].startNode != -1)
-	{
-		i++;
-		i %= 2179;
-	}
-
-	Edges[i] = edge;
-*/
 }
 
-void SuffixTree::Remove(Edge& edge)
+void SuffixTree::remove(Edge& edge)
 {
 	d_edges.erase(edge);
-/*
-	int i = Edge::Hash(edge.startNode, Text[edge.firstCharIndex]);
-
-	for (; ;)
-	{
-		Edges[i].startNode = -1;
-		int j = 1;
-
-		for (; ;)
-		{
-			i++;
-			i %= 2179;
-			if (Edges[i].startNode == -1)
-			{
-				return;
-			}
-
-			int r = Edge::Hash(Edges[i].startNode, Text[Edges[i].firstCharIndex]);
-
-			if (i >= r && r > j)
-			{
-				continue;
-			}
-			if (r > j && i >= r)
-			{
-				continue;
-			}
-			if (j > 1 && i >= r)
-			{
-				continue;
-			}
-
-			break;
-		}
-
-		Edges[j] = Edges[i];
-	}
-*/
 }
 
-int SuffixTree::SplitEdge(Suffix &suffix, Edge &edge)
+int SuffixTree::splitEdge(Suffix &suffix, Edge edge)
 {
-	Remove(edge);
-	Edge newEdge(edge.getFirstCharIndex(),
-			edge.getFirstCharIndex() + suffix.lastCharIndex - suffix.firstCharIndex,
-			suffix.originNode, d_nodes.size(), edge.getFirstChar());
-	assert(edge.getFirstChar() == Text[edge.getFirstCharIndex()]);
+	remove(edge);
+
+	Edge newEdge(edge.getFirstCharIndex(), edge.getFirstCharIndex()
+			+ suffix.getLastCharIndex() - suffix.getFirstCharIndex(), suffix.getOriginNode(),
+			d_nodes.size(), edge.getFirstChar());
+
+	assert(edge.getFirstChar() == d_text[edge.getFirstCharIndex()]);
 	assert(d_nodes.find(d_nodes.size()) == d_nodes.end());
-	d_nodes[(int)d_nodes.size()] = Node();
-	Insert(newEdge);
+	d_nodes[(int) d_nodes.size()] = Node();
 
-	d_nodes[newEdge.endNode].suffixNode = suffix.originNode;
-	//Nodes[newEdge.endNode].suffixNode = suffix.originNode;
-	int index = edge.getFirstCharIndex() + suffix.lastCharIndex - suffix.firstCharIndex +1;
-	edge.setFirstCharIndex(index, Text[index]);
-	//edge.firstCharIndex += suffix.lastCharIndex - suffix.firstCharIndex + 1;
-	edge.startNode = newEdge.endNode;
+	insert(newEdge);
 
-	Insert(edge);
+	d_nodes[newEdge.getEndNode()].setSuffixNode( suffix.getOriginNode() );
+	int index = edge.getFirstCharIndex() + suffix.getLastCharIndex()
+			- suffix.getFirstCharIndex() + 1;
 
-	return newEdge.endNode;
+	assert((index >=0) && (index < static_cast<int>(d_text.length())));
+
+	edge.setFirstCharIndex(index, d_text[index]);
+	edge.setStartNode(newEdge.getEndNode());
+
+	insert(edge);
+
+	return newEdge.getEndNode();
 }
 
-void SuffixTree::dump_edges( int current_n )
+void SuffixTree::dumpEdges(int current_n)
 {
-    cout << " Start  End  Suf  First Last  String\n";
-    //for ( int j = 0 ; j < 2179 ; j++ ) {
-    //    Edge *s = Edges + j;
-    for(EdgeHashSet::const_iterator cit = d_edges.begin(); cit != d_edges.end();++cit)
-    {
-    	const Edge* s = &(*cit);
-        if ( s->startNode == -1 )
-            continue;
-        std::cout << std::setw( 5 ) << s->startNode << " "
-             << std::setw( 5 ) << s->endNode << " "
-             << std::setw( 3 ) << d_nodes[ s->endNode ].suffixNode << " "
-             << std::setw( 5 ) << s->getFirstCharIndex() << " "
-             << std::setw( 6 ) << s->lastCharIndex << "  ";
-        int top;
-        if ( current_n > s->lastCharIndex )
-            top = s->lastCharIndex;
-        else
-            top = current_n;
-        for ( int l = s->getFirstCharIndex() ;
-                  l <= top;
-                  l++ )
-            cout << Text[ l ];
-        cout << "\n";
-    }
+	std::cout << " Start  End  Suf  First Last  String\n";
+	for (EdgeHashSet::const_iterator cit = d_edges.begin(); cit
+			!= d_edges.end(); ++cit)
+	{
+		const Edge* s = &(*cit);
+		if (s->isNull())
+			continue;
+		std::cout << std::setw(5) << s->getStartNode() << " " << std::setw(5)
+				<< s->getEndNode() << " " << std::setw(3)
+				<< d_nodes[s->getEndNode()].getSuffixNode() << " " << std::setw(5)
+				<< s->getFirstCharIndex() << " " << std::setw(6)
+				<< s->getLastCharIndex() << "  ";
+		int top;
+		if (current_n > s->getLastCharIndex())
+			top = s->getLastCharIndex();
+		else
+			top = current_n;
+		for (int l = s->getFirstCharIndex(); l <= top; l++)
+			std::cout << d_text[l];
+		std::cout << "\n";
+	}
+
+	std::cout << "Active :" << d_active.getOriginNode() << " "
+			<< d_active.getFirstCharIndex() << " " << d_active.getLastCharIndex()
+			<< std::endl;
+
+}
+
+bool SuffixTree::isSuffix(const std::string& text)
+{
+	return isSuffix(text.begin(), text.end());
+}
+
+bool SuffixTree::isSuffix(std::string::const_iterator begin,
+		std::string::const_iterator end, int node)
+{
+	boost::iterator_range<std::string::const_iterator> testText =
+			boost::make_iterator_range(begin, end);
+#ifndef NDEBUG
+	std::cout << "Find " << boost::make_iterator_range(begin, end) << std::endl;
+#endif
+
+	Edge& e = find(node, *begin);//znajdz suffix zaczynajacy sie w node na literze *begin
+	if (e.isNull())
+	{
+		return false;
+	}
+
+	int endNode = e.getEndNode();
+	int firstChar = e.getFirstCharIndex();
+	int lastChar = e.getLastCharIndex();
+
+	boost::iterator_range<std::string::const_iterator> subText =
+			boost::make_iterator_range(d_text.begin() + firstChar, d_text.begin()
+					+ lastChar + 1);
+
+#ifndef NDEBUG
+	std::cout << " test " << testText << " subText" << subText << std::endl;
+#endif
+	if (subText.size() < testText.size())
+	{
+		if (boost::starts_with(testText, subText))
+		{
+			return isSuffix(begin + subText.size(), end, endNode);
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else if (boost::starts_with(subText, testText))
+	{
+		return true;
+	}
+
+	return false;
 }

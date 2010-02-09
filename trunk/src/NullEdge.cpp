@@ -10,12 +10,12 @@
 
 NullEdge::NullEdge()
 {
-	Edge::startNode = -1;
+	setStartNode(-1);
 }
 
 Edge& NullEdge::getNull()
 {
 	static NullEdge s_nullEdge;
-	assert(s_nullEdge.startNode == -1);
+	assert(s_nullEdge.getStartNode() == -1);
 	return s_nullEdge;
 }
