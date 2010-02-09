@@ -1,22 +1,28 @@
 #include "Node.h"
 
-const int Node::EMPTY = -1;
+/*
 
-Node::Node() :
+template<typename T>
+NodeTemplate<T>::NodeTemplate() :
 	d_suffixNode(EMPTY)
 {
 }
 
-Node::Node(int node) :
+template<typename T>
+NodeTemplate<T>::NodeTemplate(T node) :
 	d_suffixNode(node)
 {
 }
 
-int Node::getSuffixNode() const
+template<typename T>
+T NodeTemplate<T>::getSuffixNode() const
 {
 	return d_suffixNode;
 }
-void Node::setSuffixNode(int suffixNode)
+
+template<typename T>
+void NodeTemplate<T>::setSuffixNode(T suffixNode)
 {
 	d_suffixNode = suffixNode;
 }
+*/

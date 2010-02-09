@@ -1,19 +1,47 @@
 #ifndef __NODE_H
 #define __NODE_H
 
-class Node
+template<typename Traits>
+class NodeTemplate
 {
 public:
-	Node();
-	Node(int suffixNode);
+	typedef typename Traits::NodeT NodeT;
+	const static NodeT EMPTY = Traits::EMPTY_NODE ;
 
-	int getSuffixNode() const;
-	void setSuffixNode(int suffixNode);
-	const static int EMPTY;
+	NodeTemplate();
+	NodeTemplate(NodeT suffixNode);
+
+	NodeT getSuffixNode() const;
+	void setSuffixNode(NodeT suffixNode);
+
 private:
-	int d_suffixNode;
+	NodeT d_suffixNode;
 };
 
+template<typename T>
+NodeTemplate<T>::NodeTemplate() :
+	d_suffixNode(NodeTemplate<T>::EMPTY)
+{
+}
+
+template<typename T>
+NodeTemplate<T>::NodeTemplate(NodeT node) :
+	d_suffixNode(node)
+{
+}
+
+template<typename T>
+typename NodeTemplate<T>::NodeT
+NodeTemplate<T>::getSuffixNode() const
+{
+	return d_suffixNode;
+}
+
+template<typename T>
+void NodeTemplate<T>::setSuffixNode(NodeT suffixNode)
+{
+	d_suffixNode = suffixNode;
+}
 
 
 #endif

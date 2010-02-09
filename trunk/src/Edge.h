@@ -4,48 +4,145 @@
 #include <functional>
 #include <boost/functional/hash.hpp>
 #include <boost/utility.hpp>
+#include "SuffixTreeTypeTraits.h"
 
-class NullEdge;
+template<typename T>
 class EdgeEqualTo;
-class Edge
+
+template<typename Traits>
+class EdgeTemplate
 {
 public:
-	Edge();
-	Edge(int initialFirstCharIndex, int initialLastCharIndex, int parentNode,
-			int endNode, char firstChar);
+	typedef typename Traits::NodeT NodeT;
+	typedef typename Traits::IndT IndT;
+	typedef typename Traits::CharT CharT;
+	const static NodeT EMPTY = Traits::EMPTY_NODE;
 
-	static int Hash(int node, int c);
-	int getFirstCharIndex() const;
-	void setFirstCharIndex(int firstCharIndex, char c);
+	EdgeTemplate();
 
-	int getLastCharIndex() const;
-	void setLastCharIndex(int firstCharIndex);
+	EdgeTemplate(IndT initialFirstCharIndex, IndT initialLastCharIndex,
+			NodeT parentNode, NodeT endNode, CharT firstChar);
 
-	void setFirstChar(char c);
-	char getFirstChar() const;
+	IndT getFirstCharIndex() const;
+	void setFirstCharIndex(IndT firstCharIndex, CharT c);
 
-	int getStartNode() const;
-	void setStartNode(int node);
+	IndT getLastCharIndex() const;
+	void setLastCharIndex(IndT firstCharIndex);
 
-	const int getEndNode() const;
+	void setFirstChar(CharT c);
+	CharT getFirstChar() const;
+
+	NodeT getStartNode() const;
+	void setStartNode(NodeT node);
+
+	const NodeT getEndNode() const;
 
 	bool isNull() const;
+
+
 private:
-	friend class EdgeEqualTo;
-	Edge& operator=(const Edge& value);
+	friend class EdgeEqualTo<EdgeTemplate> ;
+	EdgeTemplate& operator=(const EdgeTemplate& value);
 
-	int d_firstCharIndex;
-	int d_lastCharIndex;
+	IndT d_firstCharIndex;
+	IndT d_lastCharIndex;
 
-	int d_startNode;
-	const int d_endNode;
+	NodeT d_startNode;
+	const NodeT d_endNode;
 
-	char d_firstChar;
+	CharT d_firstChar;
 };
 
-struct EdgeHash: public std::unary_function<Edge, std::size_t>
+template<typename T>
+EdgeTemplate<T>::EdgeTemplate() :
+	d_startNode(EMPTY), d_endNode(EMPTY)
 {
-	inline std::size_t operator()(Edge const& edge) const
+}
+
+template<typename T>
+EdgeTemplate<T>::EdgeTemplate(
+		EdgeTemplate<T>::IndT initialFirstCharIndex,
+		IndT initialLastCharIndex, NodeT parentNode,
+		EdgeTemplate<T>::NodeT endNode, CharT firstChar) :
+	d_firstCharIndex(initialFirstCharIndex), d_lastCharIndex(
+			initialLastCharIndex), d_startNode(parentNode), d_endNode(endNode),
+			d_firstChar(firstChar)
+{
+}
+
+template<typename T>
+EdgeTemplate<T>& EdgeTemplate<T>::operator=(const EdgeTemplate& value)
+{
+	assert(false);
+	return *this;
+}
+
+template<typename T>
+inline void EdgeTemplate<T>::setFirstCharIndex(EdgeTemplate::IndT index,
+		EdgeTemplate::CharT c)
+{
+	this->d_firstCharIndex = index;
+	this->d_firstChar = c;
+}
+
+template<typename T>
+inline typename EdgeTemplate<T>::IndT EdgeTemplate<T>::getFirstCharIndex() const
+{
+	return d_firstCharIndex;
+}
+
+template<typename T>
+inline typename EdgeTemplate<T>::IndT EdgeTemplate<T>::getLastCharIndex() const
+{
+	return d_lastCharIndex;
+}
+
+template<typename T>
+inline void EdgeTemplate<T>::setLastCharIndex(IndT index)
+{
+	d_lastCharIndex = index;
+}
+
+template<typename T>
+inline void EdgeTemplate<T>::setFirstChar(EdgeTemplate::CharT c)
+{
+	d_firstChar = c;
+}
+
+template<typename T>
+inline typename EdgeTemplate<T>::CharT EdgeTemplate<T>::getFirstChar() const
+{
+	return d_firstChar;
+}
+
+template<typename T>
+inline typename EdgeTemplate<T>::NodeT EdgeTemplate<T>::getStartNode() const
+{
+	return d_startNode;
+}
+
+template<typename T>
+inline void EdgeTemplate<T>::setStartNode(NodeT node)
+{
+	d_startNode = node;
+}
+
+template<typename T>
+inline const typename EdgeTemplate<T>::NodeT EdgeTemplate<T>::getEndNode() const
+{
+	return d_endNode;
+}
+
+template<typename T>
+inline bool EdgeTemplate<T>::isNull() const
+{
+	return (d_startNode == EdgeTemplate<T>::EMPTY);
+}
+
+template<typename EdgeT>
+struct EdgeHash: public std::unary_function<EdgeT, std::size_t>
+{
+	inline std::size_t operator()(EdgeT const& edge) const
 	{
 		std::size_t seed = 0;
 		boost::hash_combine(seed, edge.getStartNode());
@@ -54,9 +151,10 @@ struct EdgeHash: public std::unary_function<Edge, std::size_t>
 	}
 };
 
-struct EdgeEqualTo: public std::binary_function<Edge, Edge, bool>
+template<typename EdgeT>
+struct EdgeEqualTo: public std::binary_function<EdgeT, EdgeT, bool>
 {
-	inline bool operator()(const Edge & a, const Edge & b) const
+	inline bool operator()(const EdgeT& a, const EdgeT& b) const
 	{
 		if (a.d_startNode == b.d_startNode)
 		{
@@ -70,55 +168,5 @@ struct EdgeEqualTo: public std::binary_function<Edge, Edge, bool>
 	}
 
 };
-
-inline void Edge::setFirstCharIndex(int index, char c)
-{
-	this->d_firstCharIndex = index;
-	this->d_firstChar = c;
-}
-
-inline int Edge::getFirstCharIndex() const
-{
-	return d_firstCharIndex;
-}
-
-inline int Edge::getLastCharIndex() const
-{
-	return d_lastCharIndex;
-}
-
-inline void Edge::setLastCharIndex(int index)
-{
-	d_lastCharIndex = index;
-}
-
-inline void Edge::setFirstChar(char c)
-{
-	d_firstChar = c;
-}
-inline char Edge::getFirstChar() const
-{
-	return d_firstChar;
-}
-
-inline int Edge::getStartNode() const
-{
-	return d_startNode;
-}
-
-inline void Edge::setStartNode(int node)
-{
-	d_startNode = node;
-}
-
-inline const int Edge::getEndNode() const
-{
-	return d_endNode;
-}
-
-inline bool Edge::isNull() const
-{
-	return (d_startNode == -1);
-}
 
 #endif

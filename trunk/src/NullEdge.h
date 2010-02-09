@@ -9,12 +9,29 @@
 #define NULLEDGE_H_
 
 #include "Edge.h"
+#include <cassert>
 
-class NullEdge: public Edge {
-	NullEdge();
+template<typename Traits>
+class NullEdgeTemplate: public EdgeTemplate<Traits>
+{
+	NullEdgeTemplate();
 
 public:
-	static Edge& getNull();
+	static EdgeTemplate<Traits>& getNull();
 };
+
+template<typename T>
+NullEdgeTemplate<T>::NullEdgeTemplate()
+{
+	setStartNode(EdgeTemplate<T>::EMPTY);
+}
+
+template<typename T>
+EdgeTemplate<T>& NullEdgeTemplate<T>::getNull()
+{
+	static NullEdgeTemplate s_nullEdge;
+	assert(s_nullEdge.getStartNode() == EdgeTemplate<T>::EMPTY);
+	return s_nullEdge;
+}
 
 #endif /* NULLEDGE_H_ */

@@ -1,6 +1,6 @@
 CC=g++
-CFLAGS=-Wall -g
-CXXFLAGS=-Wall -g --pedantic
+CFLAGS=-Wall -g 
+CXXFLAGS=-Wall -g -DBOOST_HAS_LONG_LONG -DNDEBUG 
 OBJECTS=src/Node.o src/Edge.o src/NullEdge.o src/Suffix.o src/SuffixTree.o src/Example.o
 
 default: all
