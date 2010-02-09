@@ -1,3 +1,5 @@
+/*
+
 #include <string>
 #include <iostream>
 #include <iomanip>
@@ -5,14 +7,17 @@
 #include "Node.h"
 #include "Suffix.h"
 #include "Edge.h"
-#include "NullEdge.h"
+
 #include <cassert>
 #include <boost/unordered_map.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/range.hpp>
+#include <limits.h>
+
+const SuffixTree::IndT SuffixTree::INDEX_OUT = -1;//UINT_MAX;
 
 SuffixTree::SuffixTree(const std::string& inputText) :
-	d_text(inputText), d_active(0, 0, -1)
+	d_text(inputText), d_active(0, 0, INDEX_OUT)
 {
 	Node zero_Node(0);
 	d_nodes[0] = zero_Node;
@@ -27,10 +32,10 @@ SuffixTree::~SuffixTree()
 {
 }
 
-void SuffixTree::addPrefix(Suffix &active, int lastCharIndex)
+void SuffixTree::addPrefix(Suffix &active, IndT lastCharIndex)
 {
-	int parentNode;
-	int lastParentNode = Node::EMPTY;
+	NodeT parentNode;
+	NodeT lastParentNode = Node::EMPTY;
 
 	for (;;)
 	{
@@ -48,7 +53,7 @@ void SuffixTree::addPrefix(Suffix &active, int lastCharIndex)
 		{
 			Edge& tmpEdge =
 					find(d_active.getOriginNode(), d_text[d_active.getFirstCharIndex()]);
-			int span = d_active.getLastCharIndex() - d_active.getFirstCharIndex();
+			IndT_diff span = d_active.getLastCharIndex() - d_active.getFirstCharIndex();
 
 			if (d_text[tmpEdge.getFirstCharIndex() + span + 1]
 					== d_text[lastCharIndex])
@@ -99,12 +104,14 @@ void SuffixTree::canonize(Suffix& suffix)
     if ( !suffix.isExplicit() ) {
 
         Edge* edge = &(find( suffix.getOriginNode(), d_text[ suffix.getFirstCharIndex() ] ));
-        int edge_span = edge->getLastCharIndex() - edge->getFirstCharIndex();
+        IndT_diff edge_span = edge->getLastCharIndex() - edge->getFirstCharIndex();
         while ( edge_span <= ( suffix.getLastCharIndex() - suffix.getFirstCharIndex()) ) {
 
         	suffix.setFirstCharIndex( suffix.getFirstCharIndex() + edge_span + 1);
         	suffix.setOriginNode( edge->getEndNode() );
-            if ( suffix.getFirstCharIndex() <= suffix.getLastCharIndex()) {
+
+        	//if ( suffix.getFirstCharIndex() <= suffix.getLastCharIndex()) {
+        	if (suffix.isImplicit()) {
                 edge = &(find( edge->getEndNode(), d_text[ suffix.getFirstCharIndex() ] ));
                 edge_span = edge->getLastCharIndex()- edge->getFirstCharIndex();
             };
@@ -112,7 +119,7 @@ void SuffixTree::canonize(Suffix& suffix)
     }
 }
 
-Edge& SuffixTree::find(int nodeParent, char firstCharOnEdge)
+SuffixTree::Edge& SuffixTree::find(NodeT nodeParent, CharT firstCharOnEdge)
 {
 	Edge mockEdge(0, 0, nodeParent, Node::EMPTY, firstCharOnEdge);
 	EdgeHashSet::const_iterator cit = d_edges.find(mockEdge);
@@ -134,7 +141,7 @@ void SuffixTree::remove(Edge& edge)
 	d_edges.erase(edge);
 }
 
-int SuffixTree::splitEdge(Suffix &suffix, Edge edge)
+SuffixTree::NodeT SuffixTree::splitEdge(Suffix &suffix, Edge edge)
 {
 	remove(edge);
 
@@ -192,6 +199,17 @@ void SuffixTree::dumpEdges(int current_n)
 
 }
 
+void SuffixTree::addText(const std::string& t)
+{
+	int oldLength = d_text.length();
+	std::string& s = const_cast<std::string&>(d_text);
+	s+= t;
+	for (unsigned int i = oldLength; i < d_text.length(); ++i)
+	{
+		addPrefix(d_active, i);
+	}
+}
+
 bool SuffixTree::isSuffix(const std::string& text)
 {
 	return isSuffix(text.begin(), text.end());
@@ -241,3 +259,4 @@ bool SuffixTree::isSuffix(std::string::const_iterator begin,
 
 	return false;
 }
+*/

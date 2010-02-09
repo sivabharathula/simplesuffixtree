@@ -6,16 +6,18 @@
  */
 
 #include "NullEdge.h"
+/*
 #include <cassert>
 
 NullEdge::NullEdge()
 {
-	setStartNode(-1);
+	setStartNode(Edge::EMPTY);
 }
 
 Edge& NullEdge::getNull()
 {
 	static NullEdge s_nullEdge;
-	assert(s_nullEdge.getStartNode() == -1);
+	assert(s_nullEdge.getStartNode() == Edge::EMPTY);
 	return s_nullEdge;
 }
+*/

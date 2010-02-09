@@ -1,7 +1,5 @@
 #include "Suffix.h"
-#include "Edge.h"
-#include "SuffixTree.h"
-
+/*
 Suffix::Suffix(int node, int start, int stop) :
 	d_originNode(node), d_firstCharIndex(start), d_lastCharIndex(stop)
 {
@@ -9,6 +7,10 @@ Suffix::Suffix(int node, int start, int stop) :
 
 bool Suffix::isExplicit()
 {
+	if (d_lastCharIndex == SuffixTree::INDEX_OUT)
+	{
+		return true;
+	}
 	return d_firstCharIndex > d_lastCharIndex;
 }
 
@@ -46,4 +48,4 @@ void Suffix::setOriginNode(int node)
 {
 	d_originNode = node;
 }
-
+*/
