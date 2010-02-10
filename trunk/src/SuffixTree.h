@@ -216,11 +216,19 @@ private:
 	Edge& find(NodeT nodeParent, CharT firstCharOnEdge);
 
 	NodeT splitEdge(Suffix &suffix, Edge edge);
+
+	/**
+	 * Przekształca suffix do postaci kannonicznej
+	 *
+	 */
 	void canonize(Suffix& suffix);
 
+	/// Tekst na którym operuje drzewo suffixów.
 	const sufstring& d_text;
 	Suffix d_active;
+	///tablica mieszająca zawierajaca krawędzie drzewa
 	EdgeHashSet d_edges;
+	/// Kontener zawierający węzły drzewa
 	NodeMap d_nodes;
 
 };
