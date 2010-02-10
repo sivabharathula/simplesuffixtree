@@ -4,36 +4,20 @@
 #include <string>
 #include <iostream>
 #include <iomanip>
+#include <iterator>
+#include <map>
+#include <boost/unordered_set.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/range.hpp>
+
 #include "Suffix.h"
 #include "Edge.h"
 #include "Node.h"
 #include "NullEdge.h"
-#include <boost/unordered_set.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/range.hpp>
-#include <map>
-#include <limits.h>
-
 #include "SuffixTreeTypeTraits.h"
 
-//
-#include <string>
-#include <iostream>
-#include <iomanip>
-#include "SuffixTree.h"
-#include "Node.h"
-#include "Suffix.h"
-#include "Edge.h"
-
-#include <cassert>
-#include <boost/unordered_map.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/range.hpp>
-#include <limits.h>
-//
-
-
-template<typename T = unsigned int, typename stringT = std::string, typename Traits = SuffixTreeTraits<T,typename stringT::value_type> >
+template<typename T = unsigned int, typename stringT = std::string,
+		typename Traits = SuffixTreeTraits<T, typename stringT::value_type> >
 class SuffixTreeTemplate
 {
 public:
@@ -50,6 +34,93 @@ public:
 	typedef stringT sufstring;
 
 	static const IndT INDEX_OUT = Traits::OUT_OF_RANGE;
+
+	/*** Iterator definition  *************************************************************/
+	class SuffixIterator;
+	friend class SuffixTreeTemplate::SuffixIterator;
+	class SuffixIterator: public std::iterator<std::random_access_iterator_tag,
+			T>
+	{
+
+		friend class SuffixTreeTemplate;
+		SuffixIterator(SuffixTreeTemplate& parent, IndT pos = 0) :
+			d_pos(pos), d_parent(parent)
+		{
+		}
+	public:
+		SuffixIterator(const SuffixIterator& it) :
+			d_pos(it.d_pos), d_parent(it.d_parent)
+		{
+		}
+		SuffixIterator& operator++()
+		{
+			++d_pos;
+			return *this;
+		}
+
+		const SuffixIterator& operator++() const
+		{
+			IndT* pos = const_cast<IndT*> (&d_pos);
+			++(*pos);
+			return *this;
+		}
+
+		SuffixIterator& operator++(int)
+		{
+			SuffixIterator copy(*this);
+			++*this;
+			return *copy;
+		}
+
+		const SuffixIterator& operator++(int) const
+		{
+			const SuffixIterator copy(*this);
+			++*this;
+			return *copy;
+		}
+
+		bool operator==(const SuffixIterator& rhs)
+		{
+			assert(&d_text == &rhs.d_text);
+			return this->d_pos == rhs.d_pos;
+		}
+
+		bool operator!=(const SuffixIterator& rhs) const
+		{
+			assert(&d_parent == &rhs.d_parent);
+			return this->d_pos != rhs.d_pos;
+		}
+
+		boost::iterator_range<typename sufstring::iterator> operator*()
+		{
+			sufstring& text = const_cast<sufstring&> (d_parent.d_text);
+
+			return boost::iterator_range<typename sufstring::iterator>(
+					text.begin() + d_pos, text.end());
+		}
+
+		boost::iterator_range<typename sufstring::const_iterator> operator*() const
+		{
+			return boost::iterator_range<typename sufstring::const_iterator>(
+					d_parent.d_text.begin() + d_pos, d_parent.d_text.end());
+		}
+
+	private:
+		IndT d_pos;
+		SuffixTreeTemplate& d_parent;
+	};
+
+	typedef SuffixIterator iterator;
+	typedef const SuffixIterator const_iterator;
+
+	const_iterator begin() const;
+	const_iterator end() const;
+
+	iterator begin();
+	iterator end();
+
+	/*** End of Iterator definition  *************************************************************/
+
 	SuffixTreeTemplate(const sufstring& inputText);
 	~SuffixTreeTemplate();
 
@@ -107,7 +178,8 @@ SuffixTreeTemplate<T, T2, T3>::~SuffixTreeTemplate()
 }
 
 template<typename T, typename T2, typename T3>
-void SuffixTreeTemplate<T, T2, T3>::addPrefix(Suffix &active, IndT lastCharIndex)
+void SuffixTreeTemplate<T, T2, T3>::addPrefix(Suffix &active,
+		IndT lastCharIndex)
 {
 	NodeT parentNode;
 	NodeT lastParentNode = Node::EMPTY;
@@ -186,7 +258,7 @@ void SuffixTreeTemplate<T, T2, T3>::canonize(Suffix& suffix)
 				d_text[suffix.getFirstCharIndex()]));
 		IndT_diff edge_span = edge->getLastCharIndex()
 				- edge->getFirstCharIndex();
-		while (edge_span <= static_cast<IndT_diff>(suffix.getLastCharIndex()
+		while (edge_span <= static_cast<IndT_diff> (suffix.getLastCharIndex()
 				- suffix.getFirstCharIndex()))
 		{
 
@@ -276,22 +348,26 @@ void SuffixTreeTemplate<T, T2, T3>::dumpEdges(int current_n)
 				<< s->getEndNode() << " " << std::setw(3)
 				<< d_nodes[s->getEndNode()].getSuffixNode() << " "
 				<< std::setw(5)
-				<< static_cast<unsigned long long>(s->getFirstCharIndex()) << " "
-				<< std::setw(6)
-				<< static_cast<unsigned long long>(s->getLastCharIndex()) << "  ";
+				<< static_cast<unsigned long long> (s->getFirstCharIndex())
+				<< " " << std::setw(6)
+				<< static_cast<unsigned long long> (s->getLastCharIndex())
+				<< "  ";
 		int top;
-		if (current_n > static_cast<int>(s->getLastCharIndex()))
+		if (current_n > static_cast<int> (s->getLastCharIndex()))
 			top = s->getLastCharIndex();
 		else
 			top = current_n;
 
-		std::wcout <<  d_text.substr(s->getFirstCharIndex(),top).c_str() << std::endl;
+		std::wcout << d_text.substr(s->getFirstCharIndex(), top).c_str()
+				<< std::endl;
 
 	}
 
 	std::cout << "Active :" << d_active.getOriginNode() << " "
-			<< static_cast<unsigned long long>(d_active.getFirstCharIndex()) << " "
-			<< static_cast<unsigned long long>(d_active.getLastCharIndex()) << std::endl;
+			<< static_cast<unsigned long long> (d_active.getFirstCharIndex())
+			<< " "
+			<< static_cast<unsigned long long> (d_active.getLastCharIndex())
+			<< std::endl;
 
 }
 
@@ -314,7 +390,8 @@ bool SuffixTreeTemplate<T, T2, T3>::isSuffix(const sufstring& text)
 }
 
 template<typename T, typename T2, typename T3>
-bool SuffixTreeTemplate<T, T2, T3>::isSuffix(typename sufstring::const_iterator begin,
+bool SuffixTreeTemplate<T, T2, T3>::isSuffix(
+		typename sufstring::const_iterator begin,
 		typename sufstring::const_iterator end, NodeT node)
 {
 	boost::iterator_range<typename sufstring::const_iterator> testText =
@@ -357,6 +434,34 @@ bool SuffixTreeTemplate<T, T2, T3>::isSuffix(typename sufstring::const_iterator 
 	}
 
 	return false;
+}
+
+template<typename T, typename T2, typename T3>
+typename SuffixTreeTemplate<T, T2, T3>::const_iterator SuffixTreeTemplate<T,
+		T2, T3>::begin() const
+{
+	const_iterator cit(*this);
+	return cit;
+}
+template<typename T, typename T2, typename T3>
+typename SuffixTreeTemplate<T, T2, T3>::const_iterator SuffixTreeTemplate<T,
+		T2, T3>::end() const
+{
+	const_iterator cit(*this);
+	cit.d_pos = d_text.length();
+	return cit;
+}
+
+template<typename T, typename T2, typename T3>
+typename SuffixTreeTemplate<T, T2, T3>::iterator SuffixTreeTemplate<T, T2, T3>::begin()
+{
+	return iterator(*this);
+}
+template<typename T, typename T2, typename T3>
+typename SuffixTreeTemplate<T, T2, T3>::iterator SuffixTreeTemplate<T, T2, T3>::end()
+{
+	iterator it(*this, d_text.length());
+	return it;
 }
 
 #endif

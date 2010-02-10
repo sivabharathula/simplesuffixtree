@@ -1,6 +1,10 @@
 #include <iostream>
 #include "SuffixTree.h"
 #include "SuffixTreeTypeTraits.h"
+#include <boost/unordered_set.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/range.hpp>
+#include <string>
 #include <cstring>
 using namespace std;
 
@@ -19,8 +23,21 @@ int main(int argc, char** argv)
 
 
 
+
 	std::cout << "Tree uchar: \n";
 	SuffixTree tree( str );
+
+	for (SuffixTree::const_iterator cit = tree.begin(); cit!= tree.end(); ++cit)
+	{
+		std::cout << *cit << std::endl;
+
+	}
+
+	for (SuffixTree::iterator cit = tree.begin(); cit!= tree.end(); ++cit)
+	{
+		std::cout << *cit << std::endl;
+
+	}
 
 	SuffixTreeW wtree( wstr );
 	std::wcout << std::wstring(L"asdźćłżęąń\n");
