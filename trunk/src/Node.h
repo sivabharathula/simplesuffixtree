@@ -1,11 +1,25 @@
+/*
+ * Node.h
+ *
+ *  Created on: Feb 9, 2010
+ *      Author: Piotr Zemczak
+ */
+
 #ifndef __NODE_H
 #define __NODE_H
 
+/**
+ * \brief Klasa szblonowa dla typu węzła.
+ * Reprezentuje węzeł w drzewie suffixów.
+ * \param Traits cechy typów wykorzystywancyh przez NodeTemplate
+ */
 template<typename Traits>
 class NodeTemplate
 {
 public:
+	/// Typ zmiennej wskazującej numer węzła-Node
 	typedef typename Traits::NodeT NodeT;
+	/// Liczba oznaczająca brak węzła
 	const static NodeT EMPTY = Traits::EMPTY_NODE ;
 
 	NodeTemplate();
@@ -15,6 +29,7 @@ public:
 	void setSuffixNode(NodeT suffixNode);
 
 private:
+	/// zmienna reprezentująca węzeł wskazujący na suffix tekstu wskazywanego przez ten węzeł
 	NodeT d_suffixNode;
 };
 

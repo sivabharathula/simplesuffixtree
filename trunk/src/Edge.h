@@ -1,21 +1,36 @@
+/*
+ * Edge.h
+ *
+ *  Created on: Feb 9, 2010
+ *      Author: Piotr Zemczak
+ */
+
+
 #ifndef __EDGE_H
 #define __EDGE_H
 
 #include <functional>
 #include <boost/functional/hash.hpp>
 #include <boost/utility.hpp>
-#include "SuffixTreeTypeTraits.h"
+
 
 template<typename T>
 class EdgeEqualTo;
-
+/**
+ * \brief Klasa krawędzi drzewa suffixów
+ * \param Traits - Klasa cech typów wykorzystywanych przez Edge
+ */
 template<typename Traits>
 class EdgeTemplate
 {
 public:
+	/// Typ zmiennej wskazującej numer węzła-Node
 	typedef typename Traits::NodeT NodeT;
+	/// Typ zmiennej wskazującej pozycję w tekscie
 	typedef typename Traits::IndT IndT;
+	/// Typ pojedynczego znaku tekstu
 	typedef typename Traits::CharT CharT;
+	/// Liczba oznaczająca brak węzła
 	const static NodeT EMPTY = Traits::EMPTY_NODE;
 
 	EdgeTemplate();
@@ -37,19 +52,29 @@ public:
 
 	const NodeT getEndNode() const;
 
+	/*
+	 * \return true Jeśli węzeł pusty.
+	 */
 	bool isNull() const;
 
 
 private:
+	/// Klasa stwierdzjąca równość krawędzi.
 	friend class EdgeEqualTo<EdgeTemplate> ;
+	/// Asigning Edges is forbidden
 	EdgeTemplate& operator=(const EdgeTemplate& value);
 
+	/// Pierwszy znak tekstu znajdującego się na krawędzi
 	IndT d_firstCharIndex;
+	/// Ostatni znak tekstu znajdującego się na krawędzi
 	IndT d_lastCharIndex;
 
+	/// Numer węzła z którego wychodzi krawędź.
 	NodeT d_startNode;
+	/// Numer węzła do którego dochdzi krawędź. Wartość ta jest unikatowa.
 	const NodeT d_endNode;
 
+	/// Pierwszy znak na krawędzi.
 	CharT d_firstChar;
 };
 
@@ -139,6 +164,10 @@ inline bool EdgeTemplate<T>::isNull() const
 	return (d_startNode == EdgeTemplate<T>::EMPTY);
 }
 
+/**
+ * \brief klasa szablonowa obliczająca hash krawędzi.
+ * \param EdgeT Typ krawędzi w drzewie suffixów.
+ */
 template<typename EdgeT>
 struct EdgeHash: public std::unary_function<EdgeT, std::size_t>
 {
@@ -151,6 +180,12 @@ struct EdgeHash: public std::unary_function<EdgeT, std::size_t>
 	}
 };
 
+/**
+ * \brief Obiekt funkcyjny określający równość krawędzi.
+ * \param EdgeT Typ krawędzi w drzewie suffixów.
+ * Krawędź jest równa wtedy i tylko wtedy gdy wychodzi z tego samego węzła
+ * i ma tą samą literę na swojej krawędzi.
+ */
 template<typename EdgeT>
 struct EdgeEqualTo: public std::binary_function<EdgeT, EdgeT, bool>
 {

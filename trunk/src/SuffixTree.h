@@ -1,3 +1,10 @@
+/*
+ * SuffixTree.h
+ *
+ *  Created on: Feb 9, 2010
+ *      Author: Piotr Zemczak
+ */
+
 #ifndef __SUFFIXTREE_H
 #define __SUFFIXTREE_H
 
@@ -10,29 +17,58 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/range.hpp>
 
+#ifndef __SUFFIX_H
 #include "Suffix.h"
-#include "Edge.h"
-#include "Node.h"
-#include "NullEdge.h"
-#include "SuffixTreeTypeTraits.h"
+#endif
 
+#ifndef __EDGE_H
+#include "Edge.h"
+#endif
+
+#ifndef NULLEDGE_H_
+#include "NullEdge.h"
+#endif
+
+#ifndef __NODE_H
+#include "Node.h"
+#endif
+
+#ifndef SUFFIXTREETYPETRAITS_H_
+#include "SuffixTreeTypeTraits.h"
+#endif
+
+/**
+ * \brief Klasa szablonowa drzewa suffixów.
+ * \param T typ zmiennej przechowywującej rozmiar tekstu.
+ * \param stringT Typ zmiennej reprezentującej łańcuch znaków
+ * \param Traits parametr z cechami typów stosowanych w drzewie.
+ */
 template<typename T = unsigned int, typename stringT = std::string,
 		typename Traits = SuffixTreeTraits<T, typename stringT::value_type> >
 class SuffixTreeTemplate
 {
 public:
-
+	/// Typ zmiennej wskazującej numer węzła-Node
 	typedef typename Traits::NodeT NodeT;
+	/// Typ zmiennej wskazującej pozycję w tekscie
 	typedef typename Traits::IndT IndT;
+	/// Typ zmiennej wskazującej różnicę pomiędzy IndT
 	typedef typename Traits::IndT_diff IndT_diff;
+	/// Typ pojedynczego znaku tekstu
 	typedef typename Traits::CharT CharT;
 
+	/// Eddge typ specjalizacji krawędzi wykorzystywanej w drzewie.
 	typedef EdgeTemplate<Traits> Edge;
+	/// Node typ specjalizacji węzła wykorzystywanego w drzewie.
 	typedef NodeTemplate<Traits> Node;
+	/// NodeNull typ specjalizacji węzła pustego wykorzystywanego w drzewie.
 	typedef NullEdgeTemplate<Traits> NullEdge;
+	/// Typ reprezentujący suffix
 	typedef SuffixTemplate<Traits> Suffix;
+	/// Nazwa typu literału łańcuchowego
 	typedef stringT sufstring;
 
+	/// Liczba reprezentująca pozycję poza tekstem
 	static const IndT INDEX_OUT = Traits::OUT_OF_RANGE;
 
 	/*** Iterator definition  *************************************************************/
@@ -110,10 +146,14 @@ public:
 		SuffixTreeTemplate& d_parent;
 	};
 
+	/// Typ iteratora do przechodzenia po suffixach
 	typedef SuffixIterator iterator;
+	/// Typ iteratora do przechodzenia po suffixach
 	typedef const SuffixIterator const_iterator;
 
+	/// Zwraca iterator na pierwszy suffix
 	const_iterator begin() const;
+	/// Zwraca iterator na suffix za ostatnim
 	const_iterator end() const;
 
 	iterator begin();
@@ -121,26 +161,58 @@ public:
 
 	/*** End of Iterator definition  *************************************************************/
 
+	/**
+	 * Konstruktor tworzy drzewo suffixów.
+	 * \param inputText - tekst, który ma być dodany do drzewa suffixów.
+	 */
 	SuffixTreeTemplate(const sufstring& inputText);
 	~SuffixTreeTemplate();
 
-	bool isSuffix(typename sufstring::const_iterator begin,
-			typename sufstring::const_iterator end, NodeT node = 0);
+	/**
+	 * Metoda stwierdza czy tekst znajduje się w drzewie.
+	 * \param text do wyszukania
+	 * \return true jeśli tekst został znaleziony
+	 */
 	bool isSuffix(const sufstring& text);
 
+	/**
+	 * Metoda wyświetla wszystkie krawędzi
+	 * \param current_n maksymalny rozmiar tekstu,
+	 * który może być wyświetlony jeśli na krawędzi znajduje się dłuższy tekst
+	 */
 	void dumpEdges(int current_n);
 
+	/**
+	 * Metoda dodaje tekst do drzewa suffixów.
+	 */
 	void addText(const sufstring& t);
 
 private:
+	/**
+	 * Metoda sprawdza, czy tekst wskazany przez parę iteratorów znajduje się w drzewie.
+	 * \param begin - iterator wskazujący początek tekstu.
+	 * \param end - iterator wskazujący koniec tekstu.
+	 * \param node węzeł od którego ma być rozpoczęte szukanie tekstu.
+	 *  Parametr wykorzystywany w rekurencyjnym wywoływaniu metody.
+	 *  \return true jeśli tekst został znaleziony
+	 */
+	bool isSuffix(typename sufstring::const_iterator begin,
+			typename sufstring::const_iterator end, NodeT node = 0);
+
+	/// Typ tablicy haszującej. Zawierającej krawędzie.
 	typedef boost::unordered_set<Edge, EdgeHash<Edge> , EdgeEqualTo<Edge> >
 			EdgeHashSet;
 
+	/// Typ określającyy obiekt przetrzymujący Węzły.
 	typedef std::map<NodeT, Node> NodeMap;
 
+	/// Metoda dodająca znak do drzewa suffixów.
 	void addPrefix(Suffix &active, IndT lastCharIndex);
+	/// Metoda umieszcza krawędź w tablicy mieszającej
 	void insert(Edge &edge);
+	/// Metoda usuwa krawędź z tablicy mieszającej
 	void remove(Edge &edge);
+	///Metoda wyszukuje w tablicy mieszającej
 	Edge& find(NodeT nodeParent, CharT firstCharOnEdge);
 
 	NodeT splitEdge(Suffix &suffix, Edge edge);

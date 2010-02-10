@@ -2,15 +2,20 @@
  * NullEdge.h
  *
  *  Created on: Feb 8, 2010
- *      Author: Lukasz Spintzyk
+ *      Author: Łukasz Spintzyk
  */
 
 #ifndef NULLEDGE_H_
 #define NULLEDGE_H_
 
-#include "Edge.h"
 #include <cassert>
 
+template<typename T>
+class EdgeTemplate;
+
+/**
+ * \biref Klasa reprezentująca pustą krawędź.
+ */
 template<typename Traits>
 class NullEdgeTemplate: public EdgeTemplate<Traits>
 {
@@ -19,6 +24,9 @@ class NullEdgeTemplate: public EdgeTemplate<Traits>
 public:
 	static EdgeTemplate<Traits>& getNull();
 };
+
+
+
 
 template<typename T>
 NullEdgeTemplate<T>::NullEdgeTemplate()
