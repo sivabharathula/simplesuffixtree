@@ -66,7 +66,7 @@ public:
 	typedef charType CharT;
 
 	/// Liczba reprezentująca pozycję poza tekstem
-	static const IndT OUT_OF_RANGE = UINT_MAX;
+	static const IndT OUT_OF_RANGE = -1;
 	/// Liczba oznaczająca brak węzła
 	static const NodeT EMPTY_NODE = -1;
 };

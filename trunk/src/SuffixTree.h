@@ -63,6 +63,7 @@ public:
 	typedef NodeTemplate<Traits> Node;
 	/// NodeNull typ specjalizacji węzła pustego wykorzystywanego w drzewie.
 	typedef NullEdgeTemplate<Traits> NullEdge;
+	//typedef Edge NullEdge;
 	/// Typ reprezentujący suffix
 	typedef SuffixTemplate<Traits> Suffix;
 	/// Nazwa typu literału łańcuchowego
@@ -186,6 +187,11 @@ public:
 	 * Metoda dodaje tekst do drzewa suffixów.
 	 */
 	void addText(const sufstring& t);
+
+	/**
+	 * Metoda drukuje na ekran statytykę drzewa.
+	 */
+	void printStats();
 
 private:
 	/**
@@ -348,8 +354,10 @@ void SuffixTreeTemplate<T, T2, T3>::canonize(Suffix& suffix)
 			//if ( suffix.getFirstCharIndex() <= suffix.getLastCharIndex()) {
 			if (suffix.isImplicit())
 			{
+				assert(suffix.getFirstCharIndex() < d_text.length());
 				edge = &(find(edge->getEndNode(),
 						d_text[suffix.getFirstCharIndex()]));
+
 				edge_span = edge->getLastCharIndex()
 						- edge->getFirstCharIndex();
 			};
@@ -514,6 +522,26 @@ bool SuffixTreeTemplate<T, T2, T3>::isSuffix(
 	}
 
 	return false;
+}
+
+template<typename T, typename T2, typename T3>
+void SuffixTreeTemplate<T, T2, T3>::printStats()
+{
+	std::cout << "Statstyki pamieci drzewa: " << std::endl;
+
+	NodeT edgesNum = d_edges.size();
+	int edgeSize = sizeof(Edge);
+	std::cout << "Ilosc krawedzi: " << edgesNum << std::endl;
+	std::cout << "Rozmiar krawedzi: " << edgeSize << std::endl;
+
+	NodeT nodesNum = d_nodes.size();
+	int nodesSize = sizeof(Node);
+	std::cout << "Ilosc wezlow: " << nodesNum << std::endl;
+	std::cout << "Rozmiar wezla: " << nodesSize << std::endl;
+
+	std::cout << "Rozmiar drzewa: " << (edgesNum*edgeSize + nodesNum*nodesSize)/1024.0 << " Kb" << std::endl;
+	std::cout << "Rozmiar tekstu: " << d_text.length()/1024.0 << " Kb" << std::endl;
+
 }
 
 template<typename T, typename T2, typename T3>
