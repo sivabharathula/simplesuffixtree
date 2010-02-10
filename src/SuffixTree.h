@@ -33,7 +33,7 @@
 //
 
 
-template<typename T, typename Traits = SuffixTreeTraits<T, char> >
+template<typename T = unsigned int, typename stringT = std::string, typename Traits = SuffixTreeTraits<T,typename stringT::value_type> >
 class SuffixTreeTemplate
 {
 public:
@@ -47,18 +47,19 @@ public:
 	typedef NodeTemplate<Traits> Node;
 	typedef NullEdgeTemplate<Traits> NullEdge;
 	typedef SuffixTemplate<Traits> Suffix;
+	typedef stringT sufstring;
 
 	static const IndT INDEX_OUT = Traits::OUT_OF_RANGE;
-	SuffixTreeTemplate(const std::string& inputText);
+	SuffixTreeTemplate(const sufstring& inputText);
 	~SuffixTreeTemplate();
 
-	bool isSuffix(std::string::const_iterator begin,
-			std::string::const_iterator end, NodeT node = 0);
-	bool isSuffix(const std::string& text);
+	bool isSuffix(typename sufstring::const_iterator begin,
+			typename sufstring::const_iterator end, NodeT node = 0);
+	bool isSuffix(const sufstring& text);
 
 	void dumpEdges(int current_n);
 
-	void addText(const std::string& t);
+	void addText(const sufstring& t);
 
 private:
 	typedef boost::unordered_set<Edge, EdgeHash<Edge> , EdgeEqualTo<Edge> >
@@ -74,15 +75,15 @@ private:
 	NodeT splitEdge(Suffix &suffix, Edge edge);
 	void canonize(Suffix& suffix);
 
-	const std::string& d_text;
+	const sufstring& d_text;
 	Suffix d_active;
 	EdgeHashSet d_edges;
 	NodeMap d_nodes;
 
 };
 
-template<typename T, typename T2>
-SuffixTreeTemplate<T, T2>::SuffixTreeTemplate(const std::string& inputText) :
+template<typename T, typename T2, typename T3>
+SuffixTreeTemplate<T, T2, T3>::SuffixTreeTemplate(const sufstring& inputText) :
 	d_text(inputText), d_active(0, 0, INDEX_OUT)
 {
 #ifndef NDEBUG
@@ -100,13 +101,13 @@ SuffixTreeTemplate<T, T2>::SuffixTreeTemplate(const std::string& inputText) :
 	}
 }
 
-template<typename T, typename T2>
-SuffixTreeTemplate<T, T2>::~SuffixTreeTemplate()
+template<typename T, typename T2, typename T3>
+SuffixTreeTemplate<T, T2, T3>::~SuffixTreeTemplate()
 {
 }
 
-template<typename T, typename T2>
-void SuffixTreeTemplate<T, T2>::addPrefix(Suffix &active, IndT lastCharIndex)
+template<typename T, typename T2, typename T3>
+void SuffixTreeTemplate<T, T2, T3>::addPrefix(Suffix &active, IndT lastCharIndex)
 {
 	NodeT parentNode;
 	NodeT lastParentNode = Node::EMPTY;
@@ -175,8 +176,8 @@ void SuffixTreeTemplate<T, T2>::addPrefix(Suffix &active, IndT lastCharIndex)
 	canonize(d_active);
 }
 
-template<typename T, typename T2>
-void SuffixTreeTemplate<T, T2>::canonize(Suffix& suffix)
+template<typename T, typename T2, typename T3>
+void SuffixTreeTemplate<T, T2, T3>::canonize(Suffix& suffix)
 {
 	if (!suffix.isExplicit())
 	{
@@ -204,8 +205,8 @@ void SuffixTreeTemplate<T, T2>::canonize(Suffix& suffix)
 	}
 }
 
-template<typename T, typename T2>
-typename SuffixTreeTemplate<T, T2>::Edge& SuffixTreeTemplate<T, T2>::find(
+template<typename T, typename T2, typename T3>
+typename SuffixTreeTemplate<T, T2, T3>::Edge& SuffixTreeTemplate<T, T2, T3>::find(
 		NodeT nodeParent, CharT firstCharOnEdge)
 {
 	Edge mockEdge(0, 0, nodeParent, Node::EMPTY, firstCharOnEdge);
@@ -217,21 +218,21 @@ typename SuffixTreeTemplate<T, T2>::Edge& SuffixTreeTemplate<T, T2>::find(
 	return const_cast<Edge&> (*cit);
 }
 
-template<typename T, typename T2>
-void SuffixTreeTemplate<T, T2>::insert(Edge& edge)
+template<typename T, typename T2, typename T3>
+void SuffixTreeTemplate<T, T2, T3>::insert(Edge& edge)
 {
 	d_edges.insert(edge);
 	assert(d_edges.find(edge) != d_edges.end());
 }
 
-template<typename T, typename T2>
-void SuffixTreeTemplate<T, T2>::remove(Edge& edge)
+template<typename T, typename T2, typename T3>
+void SuffixTreeTemplate<T, T2, T3>::remove(Edge& edge)
 {
 	d_edges.erase(edge);
 }
 
-template<typename T, typename T2>
-typename SuffixTreeTemplate<T, T2>::NodeT SuffixTreeTemplate<T, T2>::splitEdge(
+template<typename T, typename T2, typename T3>
+typename SuffixTreeTemplate<T, T2, T3>::NodeT SuffixTreeTemplate<T, T2, T3>::splitEdge(
 		Suffix &suffix, Edge edge)
 {
 	remove(edge);
@@ -260,8 +261,8 @@ typename SuffixTreeTemplate<T, T2>::NodeT SuffixTreeTemplate<T, T2>::splitEdge(
 	return newEdge.getEndNode();
 }
 
-template<typename T, typename T2>
-void SuffixTreeTemplate<T, T2>::dumpEdges(int current_n)
+template<typename T, typename T2, typename T3>
+void SuffixTreeTemplate<T, T2, T3>::dumpEdges(int current_n)
 {
 
 	std::cout << " Start  End  Suf  First Last  String\n";
@@ -274,29 +275,31 @@ void SuffixTreeTemplate<T, T2>::dumpEdges(int current_n)
 		std::cout << std::setw(5) << s->getStartNode() << " " << std::setw(5)
 				<< s->getEndNode() << " " << std::setw(3)
 				<< d_nodes[s->getEndNode()].getSuffixNode() << " "
-				<< std::setw(5) << s->getFirstCharIndex() << " "
-				<< std::setw(6) << s->getLastCharIndex() << "  ";
+				<< std::setw(5)
+				<< static_cast<unsigned long long>(s->getFirstCharIndex()) << " "
+				<< std::setw(6)
+				<< static_cast<unsigned long long>(s->getLastCharIndex()) << "  ";
 		int top;
-		if (current_n > s->getLastCharIndex())
+		if (current_n > static_cast<int>(s->getLastCharIndex()))
 			top = s->getLastCharIndex();
 		else
 			top = current_n;
-		for (int l = s->getFirstCharIndex(); l <= top; l++)
-			std::cout << d_text[l];
-		std::cout << "\n";
+
+		std::wcout <<  d_text.substr(s->getFirstCharIndex(),top).c_str() << std::endl;
+
 	}
 
 	std::cout << "Active :" << d_active.getOriginNode() << " "
-			<< d_active.getFirstCharIndex() << " "
-			<< d_active.getLastCharIndex() << std::endl;
+			<< static_cast<unsigned long long>(d_active.getFirstCharIndex()) << " "
+			<< static_cast<unsigned long long>(d_active.getLastCharIndex()) << std::endl;
 
 }
 
-template<typename T, typename T2>
-void SuffixTreeTemplate<T, T2>::addText(const std::string& t)
+template<typename T, typename T2, typename T3>
+void SuffixTreeTemplate<T, T2, T3>::addText(const sufstring& t)
 {
 	int oldLength = d_text.length();
-	std::string& s = const_cast<std::string&> (d_text);
+	sufstring& s = const_cast<sufstring&> (d_text);
 	s += t;
 	for (unsigned int i = oldLength; i < d_text.length(); ++i)
 	{
@@ -304,17 +307,17 @@ void SuffixTreeTemplate<T, T2>::addText(const std::string& t)
 	}
 }
 
-template<typename T, typename T2>
-bool SuffixTreeTemplate<T, T2>::isSuffix(const std::string& text)
+template<typename T, typename T2, typename T3>
+bool SuffixTreeTemplate<T, T2, T3>::isSuffix(const sufstring& text)
 {
 	return isSuffix(text.begin(), text.end());
 }
 
-template<typename T, typename T2>
-bool SuffixTreeTemplate<T, T2>::isSuffix(std::string::const_iterator begin,
-		std::string::const_iterator end, NodeT node)
+template<typename T, typename T2, typename T3>
+bool SuffixTreeTemplate<T, T2, T3>::isSuffix(typename sufstring::const_iterator begin,
+		typename sufstring::const_iterator end, NodeT node)
 {
-	boost::iterator_range<std::string::const_iterator> testText =
+	boost::iterator_range<typename sufstring::const_iterator> testText =
 			boost::make_iterator_range(begin, end);
 #ifndef NDEBUG
 	std::cout << "Find " << boost::make_iterator_range(begin, end) << std::endl;
@@ -330,7 +333,7 @@ bool SuffixTreeTemplate<T, T2>::isSuffix(std::string::const_iterator begin,
 	int firstChar = e.getFirstCharIndex();
 	int lastChar = e.getLastCharIndex();
 
-	boost::iterator_range<std::string::const_iterator> subText =
+	boost::iterator_range<typename sufstring::const_iterator> subText =
 			boost::make_iterator_range(d_text.begin() + firstChar,
 					d_text.begin() + lastChar + 1);
 
