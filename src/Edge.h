@@ -57,6 +57,8 @@ public:
 	 */
 	bool isNull() const;
 
+	static EdgeTemplate& getNull();
+
 
 private:
 	/// Klasa stwierdzjąca równość krawędzi.
@@ -82,6 +84,9 @@ template<typename T>
 EdgeTemplate<T>::EdgeTemplate() :
 	d_startNode(EMPTY), d_endNode(EMPTY)
 {
+#ifndef NDEBUG
+	std::cout << "Node Size  = " << 2*sizeof(IndT) << " "<< 2*sizeof(NodeT) << " "<< sizeof(CharT) <<std::endl;
+#endif
 }
 
 template<typename T>
@@ -93,6 +98,14 @@ EdgeTemplate<T>::EdgeTemplate(
 			initialLastCharIndex), d_startNode(parentNode), d_endNode(endNode),
 			d_firstChar(firstChar)
 {
+}
+
+template<typename T>
+EdgeTemplate<T>& EdgeTemplate<T>::getNull()
+{
+	static EdgeTemplate s_nullEdge;
+	assert(s_nullEdge.getStartNode() == EdgeTemplate<T>::EMPTY);
+	return s_nullEdge;
 }
 
 template<typename T>

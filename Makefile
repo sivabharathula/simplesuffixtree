@@ -1,6 +1,6 @@
 CC=g++
-CFLAGS=-Wall -g 
-CXXFLAGS=-Wall -g -DBOOST_HAS_LONG_LONG -DNDEBUG 
+CFLAGS=-Wall -O2 
+CXXFLAGS=-Wall -O2 -DBOOST_HAS_LONG_LONG -DNDEBUG 
 OBJECTS=src/Example.o
 
 default: all
