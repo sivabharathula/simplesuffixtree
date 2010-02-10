@@ -1,7 +1,12 @@
+/*
+ * Suffix.h
+ *
+ *  Created on: Feb 9, 2010
+ *      Author: Piotr Zemczak
+ */
+
 #ifndef __SUFFIX_H
 #define __SUFFIX_H
-
-
 
 
 template<typename SuffixTraits>

@@ -16,11 +16,9 @@ int main(int argc, char** argv)
 	//typedef SuffixTreeTemplate<unsigned char, SuffixTreeTraits<unsigned char, char> > SuffixTree;
 	typedef SuffixTreeTemplate<> SuffixTree;
 	typedef SuffixTreeTemplate<unsigned char, std::wstring > SuffixTreeW;
-
 	const char* text = "BOOKKE";
 	std::string str(text);
 	std::wstring wstr(L"BOOKKEĘĄŚź");
-
 
 
 
