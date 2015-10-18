@@ -1,0 +1,1 @@
+The project is a suffix tree implementation with the options to search and iterate.
